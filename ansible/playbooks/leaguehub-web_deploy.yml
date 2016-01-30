@@ -4,6 +4,6 @@
 # AMIs and Vagrant for development boxes.
 - hosts: all
   roles:
-#    - role: app
+    - role: app
 
 # Uncomment these out when there is a node app to install

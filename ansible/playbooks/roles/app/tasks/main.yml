@@ -8,11 +8,3 @@
     sudo: true
     sudo_user: ubuntu
     shell: /usr/bin/npm install chdir=/usr/local/src
-  - name: gulp webpack
-    sudo: true
-    sudo_user: ubuntu
-    shell: /usr/bin/gulp webpack chdir=/usr/local/src
-  - name: gulp sass
-    sudo: true
-    sudo_user: ubuntu
-    shell: /usr/bin/gulp sass chdir=/usr/local/src

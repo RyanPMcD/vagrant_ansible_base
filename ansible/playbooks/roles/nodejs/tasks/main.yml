@@ -28,10 +28,6 @@
       name=npm
       state=latest
       global=yes
-      
-  - name: Install gulp as a global module
-    sudo: true
-    shell: /usr/bin/npm install -g gulp chdir=/usr/local/src
 
   - name: Install global npm modules
     sudo: true
