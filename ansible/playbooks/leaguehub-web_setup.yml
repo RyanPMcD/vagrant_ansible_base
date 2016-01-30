@@ -1,0 +1,7 @@
+---
+# This is the first build step for the application, installed via Packer (in all
+# cases). It installs global dependencies and sets up core services, like logstash.
+- hosts: all
+  roles:
+    - role: common
+    - role: nodejs

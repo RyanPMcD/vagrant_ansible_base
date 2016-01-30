@@ -1,0 +1,111 @@
+  # -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANT_API_VERSION = "2"
+VAGRANTFILE_ROOT = File.dirname(__FILE__)
+Vagrant.require_version ">= 1.7.2"
+
+[ "nugrant", "vagrant-hostsupdater" ].each do |plugin_name|
+  raise "Please install the '#{plugin_name}' plugin: vagrant plugin install #{plugin_name}" unless Vagrant.has_plugin? plugin_name
+end
+
+# TODO: this should probably be a bunch of stuff we extract into functions or a gem.
+Vagrant.configure(VAGRANT_API_VERSION) do |config|
+  cfg = config.user.dk.leaguehub
+
+  ansible_path = cfg.ansible.path || "#{VAGRANTFILE_ROOT}/../ansible/playbooks"
+
+  config.ssh.username = "ubuntu"
+  config.ssh.password = "ubuntu"
+  config.ssh.forward_agent = true
+  config.vm.synced_folder "./", "/vagrant", disabled: true # disable the default /vagrant share
+
+  redis_ip = cfg.redis.ip || "192.168.33.50"
+  web_ip = cfg.web.ip || "192.168.33.10"
+
+  stack_vars = {
+    runtime_environment: :vagrant,
+    stack_config: {}
+  }
+
+  # Vagrant creates machines in order, so defining Redis first.
+  config.vm.define "redis" do |redis|
+
+    redis.vm.box = 'draftkings/leaguehub-redis'
+    if cfg.redis.box_path
+      redis.vm.box_url = "file://#{File.expand_path(cfg.redis.box_path)}"
+    end
+
+
+    # Create a private network, which allows host-only access to the machine
+    # using a specific IP.
+    redis.vm.post_up_message = <<-EOS
+      Server running on #{redis_ip}
+      To ssh to vm use 'vagrant ssh redis'
+      EOS
+
+    redis.vm.provider "virtualbox" do |v|
+      v.memory = cfg.redis.memory || 1024
+      v.cpus = cfg.redis.cpus || 2
+      v.customize ["modifyvm", :id, "--nictype1", "virtio"]
+    end
+
+    redis.vm.network 'private_network', ip: redis_ip
+  end
+
+  # Create a machine for the node server
+  config.vm.define "web", primary: true do |web|
+
+    web.vm.box = 'draftkings/leaguehub-web'
+    if cfg.web.box_path
+      web.vm.box_url = "file://#{File.expand_path(cfg.web.box_path)}"
+    end
+
+    # assign web vm more memory
+    web.vm.provider "virtualbox" do |v|
+      v.memory = cfg.web.memory || 2048
+      v.cpus = cfg.web.cpus || 2
+      v.customize ["modifyvm", :id, "--nictype1", "virtio"]
+    end
+
+    web_host = cfg.web.host || "leaguehub-local.draftkingstest.com"
+
+    # Create a private network, which allows host-only access to the machine
+    # using a specific IP.
+    web.vm.post_up_message = <<-EOS
+      Server running on #{web_ip}
+      To ssh to vm use 'vagrant ssh web'
+
+      To access via browser: http://#{web_host}
+      EOS
+
+    web.vm.network 'private_network', ip: web_ip
+
+    web.hostsupdater.aliases = [ web_host ]
+
+    # sync application path
+    web.vm.synced_folder "../src", "/usr/local/src", owner: "ubuntu", group: "ubuntu"
+
+
+    # Provision the node server via Ansible; web_setup is used
+    # to establish system dependencies and web_deploy sets up
+    # the application itself.
+    web.vm.provision :ansible do |ansible|
+      ansible.playbook = "#{ansible_path}/leaguehub-web_deploy.yml"
+      ansible.verbose = cfg.ansible.verbose ? '' : 'vvvv'
+    end
+
+    #web.vm.provision :ansible do |ansible|
+    #  ansible.playbook = "#{ansible_path}/leaguehub-web_configure.yml"
+    #  ansible.verbose = cfg.ansible.verbose ? '' : 'vvvv'
+
+    #  ansible.extra_vars = stack_vars.merge({
+    #    app_config: {
+    #      LH_REDIS_IP: redis_ip,
+    #      LH_API_BASE: 'http://leaguehub.draftkingsdev.com'
+    #    },
+    #    start_app: !!(cfg.start_app_on_provision)
+    #  })
+    #end
+  end
+end

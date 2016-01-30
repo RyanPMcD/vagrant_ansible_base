@@ -1,0 +1,23 @@
+---
+
+  # apply package updates
+  - name: update apt cache
+    sudo: true
+    apt:
+      update_cache: true
+      cache_valid_time: 3600
+
+  - name: install baseline dependences
+    apt: pkg={{ item }} state=latest
+    sudo: true
+    with_items: common_packages
+
+
+  # TODO: before going to prod, this means we REALLY should have a separate account actually
+  #       running the application.
+  - name: ensuring %admin exists
+    group: name=admin state=present
+  - name: give %admin passwordless sudo
+    lineinfile: "dest=/etc/sudoers state=present regexp='^%admin' line='%admin ALL=(ALL) NOPASSWD: ALL' validate='visudo -cf %s'"
+  - name: adding ubuntu user to %admin
+    user: "name=ubuntu group=ubuntu groups=admin append=yes"

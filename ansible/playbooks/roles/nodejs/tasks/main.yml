@@ -1,0 +1,39 @@
+---
+
+  # code borrowed from https://github.com/AnsibleShipyard/ansible-nodejs
+
+#  - name: Checking installed version of nodejs
+#    shell: /usr/bin/test {{nodejs_path}}bin/node -v 2> /dev/null = {{nodejs_version_tag}}
+#    register: wanted_version_installed
+#    ignore_errors: True
+
+# ^ Commented out for now b/c usr/bin/test not working properly via ansible. For now
+# we are comfortable without checking for an existing nodejs installation
+
+  - name: Add NodeSource APT key
+    sudo: true
+    apt_key: url='https://deb.nodesource.com/gpgkey/nodesource.gpg.key' state=present
+
+  - name: Add NodeSource repository
+    sudo: true
+    apt_repository: repo='deb https://deb.nodesource.com/node_0.10 trusty main' state=present
+
+  - name: Update APT to get NodeSource DEB repository and install NodeJS 0.10.x
+    sudo: true
+    apt: update_cache=yes name=nodejs
+
+  - name: Update to latest npm
+    sudo: true
+    npm: >
+      name=npm
+      state=latest
+      global=yes
+      
+  - name: Install gulp as a global module
+    sudo: true
+    shell: /usr/bin/npm install -g gulp chdir=/usr/local/src
+
+  - name: Install global npm modules
+    sudo: true
+    npm: name={{ item }} global=true
+    with_items: npm_global_packages

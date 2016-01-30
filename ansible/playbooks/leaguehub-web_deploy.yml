@@ -1,0 +1,9 @@
+---
+# This is the second playbook run to handle application-specific dependencies
+# and integrating the application with supervisord. It is run by Packer for
+# AMIs and Vagrant for development boxes.
+- hosts: all
+  roles:
+#    - role: app
+
+# Uncomment these out when there is a node app to install

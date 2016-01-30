@@ -1,0 +1,8 @@
+# Logs
+logs
+*.log
+.DS_Store
+
+# Build directories and intermediates
+node_modules
+.vagrant

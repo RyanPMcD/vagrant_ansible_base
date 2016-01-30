@@ -1,0 +1,35 @@
+# You should copy this file to .vagrantuser (either in ~ or the local directory)
+# and fill it in. If you'd like to layer multiple .vagrantuser files, you should
+# follow the directions in the 'nugrant' GitHub repo:
+#
+# https://github.com/maoueh/nugrant#quick-start
+#
+# HELPFUL NOTES:
+# - If doing local development on Vagrant boxes, you'll want to use a local
+#   path for dk.leaguehub.[web|redis].box_path. HOWEVER, Vagrant is not smart
+#   enough to use this path preferentially; if you've already loaded a
+#   Vagrant box, Vagrant will use the loaded one. You'll need to use
+#   `vagrant box delete` before running `vagrant up`.
+# - If you want to tell supervisord to take a powder and run the app manually
+#   during development (helpful for getting error messages to stdout), set
+#   dk.leaguehub.start_app_on_provision to false.
+
+
+---
+dk:
+  leaguehub:
+    start_app_on_provision: true # set to false
+    ansible:
+      path: ~ # fill this in if you need a specific ansible
+      verbose: false
+    web:
+      ip: 192.168.33.10
+      memory: 1024
+      cpus: 2
+      box_path: ~
+      host: ~ # to change the hostsupdater host (probably don't need to touch this)
+    redis:
+      ip: 192.168.33.50
+      memory: 1024
+      cpus: 2
+      box_path: ~ # set to a path to use a local box_url.

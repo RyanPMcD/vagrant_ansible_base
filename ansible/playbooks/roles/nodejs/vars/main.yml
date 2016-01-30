@@ -1,0 +1,15 @@
+---
+
+nodejs_playbook_version: "0.1.5"
+nodejs_version: "0.10.36"
+nodejs_version_tag: "v{{nodejs_version}}"
+nodejs_file_tag: "node-{{nodejs_version_tag}}"
+nodejs_file_name: "{{nodejs_file_tag}}.tar.gz"
+nodejs_base_url: "http://nodejs.org/dist/v{{nodejs_version}}/"
+nodejs_tarball_url: "{{nodejs_base_url}}{{nodejs_file_name}}"
+nodejs_shasum_url: "{{nodejs_base_url}}SHASUMS256.txt"
+nodejs_shasum_value: "b9d7d1d0294bce46686b13a05da6fc5b1e7743b597544aa888e8e64a9f178c81"
+nodejs_path: "/usr/local/"
+nodejs_tmp_dir: "/tmp/"
+npm_global_packages: []
+
